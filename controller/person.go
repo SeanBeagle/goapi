@@ -9,62 +9,62 @@ import (
 )
 
 func GetPerson(c *gin.Context) {
-	var people []model.Person
-	service.DB.Find(&people)
-	if len(people) == 0 {
-		c.String(http.StatusNotFound, "No people")
+	var records []model.Person
+	service.DB.Find(&records)
+	if len(records) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No Records"})
 		return
 	}
-	c.JSON(http.StatusOK, people)
+	c.JSON(http.StatusOK, records)
 }
 
 func GetPersonByID(c *gin.Context) {
-	var person model.Person
-	if err := service.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	var record model.Person
+	if err := service.DB.Where("id = ?", c.Param("id")).First(&record).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, person)
+	c.JSON(http.StatusOK, record)
 }
 
 func CreatePerson(c *gin.Context) {
 	// VALIDATE INPUT
-	var input model.CreatePerson
+	var input model.CreatePersonDTO
 	if err := c.ShouldBind(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// CREATE PERSON
-	person := model.Person{FirstName: input.FirstName, LastName: input.LastName}
-	service.DB.Create(&person)
-	c.JSON(http.StatusOK, person)
+	// CREATE RECORD
+	record := model.Person{FirstName: input.FirstName, LastName: input.LastName}
+	service.DB.Create(&record)
+	c.JSON(http.StatusCreated, record)
 }
 
 func PatchPerson(c *gin.Context) {
-	// GET PERSON
-	var person model.Person
-	if err := service.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	// GET RECORD
+	var record model.Person
+	if err := service.DB.Where("id = ?", c.Param("id")).First(&record).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 	// VALIDATE INPUT
-	var input model.UpdatePerson
+	var input model.UpdatePersonDTO
 	if err := c.ShouldBind(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	service.DB.Model(&person).Updates(input)
-	c.JSON(http.StatusOK, person)
+	service.DB.Model(&record).Updates(input)
+	c.JSON(http.StatusOK, record)
 }
 
 func DeletePerson(c *gin.Context) {
-	// Get model if exist
-	var person model.Person
-	if err := service.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	// GET RECORD
+	var record model.Person
+	if err := service.DB.Where("id = ?", c.Param("id")).First(&record).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	service.DB.Delete(&person)
+	service.DB.Delete(&record)
 	c.JSON(http.StatusOK, gin.H{"deleted": true})
 }
 

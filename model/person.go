@@ -6,12 +6,12 @@ type Person struct {
 	LastName  string `json:"lastName" form:"lastName"`
 }
 
-type CreatePerson struct {
+type CreatePersonDTO struct {
 	FirstName string `form:"firstName" binding:"required"`
 	LastName  string `form:"lastName" binding:"required"`
 }
 
-type UpdatePerson struct {
+type UpdatePersonDTO struct {
 	FirstName string `form:"firstName"`
 	LastName  string `form:"lastName"`
 }
