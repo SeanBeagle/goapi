@@ -1,16 +1,16 @@
-package endpoint
+package controller
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/seanbeagle/goapi/database"
 	"github.com/seanbeagle/goapi/model"
+	"github.com/seanbeagle/goapi/service"
 )
 
 func GetPerson(c *gin.Context) {
 	var people []model.Person
-	database.DB.Find(&people)
+	service.DB.Find(&people)
 	if len(people) == 0 {
 		c.String(http.StatusNotFound, "No people")
 		return
@@ -20,7 +20,7 @@ func GetPerson(c *gin.Context) {
 
 func GetPersonByID(c *gin.Context) {
 	var person model.Person
-	if err := database.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
+	if err := service.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -36,14 +36,14 @@ func CreatePerson(c *gin.Context) {
 	}
 	// CREATE PERSON
 	person := model.Person{FirstName: input.FirstName, LastName: input.LastName}
-	database.DB.Create(&person)
+	service.DB.Create(&person)
 	c.JSON(http.StatusOK, person)
 }
 
 func PatchPerson(c *gin.Context) {
 	// GET PERSON
 	var person model.Person
-	if err := database.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
+	if err := service.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -53,17 +53,28 @@ func PatchPerson(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	database.DB.Model(&person).Updates(input)
+	service.DB.Model(&person).Updates(input)
 	c.JSON(http.StatusOK, person)
 }
 
 func DeletePerson(c *gin.Context) {
 	// Get model if exist
 	var person model.Person
-	if err := database.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
+	if err := service.DB.Where("id = ?", c.Param("id")).First(&person).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
-	database.DB.Delete(&person)
+	service.DB.Delete(&person)
 	c.JSON(http.StatusOK, gin.H{"deleted": true})
+}
+
+func RegisterPersonEndpoints(engine *gin.Engine) {
+	v1 := engine.Group("/v1")
+	{
+		v1.GET("/person", GetPerson)
+		v1.GET("/person/:id", GetPersonByID)
+		v1.POST("/person", CreatePerson)
+		v1.DELETE("/person/:id", DeletePerson)
+		v1.PATCH("/person/:id", PatchPerson)
+	}
 }

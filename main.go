@@ -2,14 +2,13 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/seanbeagle/goapi/database"
-	"github.com/seanbeagle/goapi/endpoint"
+	"github.com/seanbeagle/goapi/controller"
+	"github.com/seanbeagle/goapi/service"
 )
 
 func main() {
 	engine := gin.Default()
-
-	endpoint.RegisterEndpoints(engine)
-	database.ConnectDatabase()
+	service.ConnectDatabase()
+	controller.RegisterPersonEndpoints(engine)
 	engine.Run(":8080")
 }
