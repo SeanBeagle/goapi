@@ -39,3 +39,12 @@ A simple template for a REST API written in go using:
 ## service
 
 ### db
+
+# TIPS
+docker build -t goapi .
+docker run -it --rm -p 8080:8080 goapi-dev
+
+
+# REFERENCES
+
+- https://blog.logrocket.com/how-to-build-a-rest-api-with-golang-using-gin-and-gorm/
